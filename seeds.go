@@ -82,7 +82,8 @@ func update(grid map[string]int) map[string]int {
 }
 
 // render grid
-func render(grid map[string]int, frames int, dim int) {
+func render(grid *map[string]int, frames int, dim int) {
+	var g = *grid
 	var palette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff}, color.RGBA{0x00, 0x00, 0xff, 0xff},
 		color.RGBA{0x00, 0xff, 0x00, 0xff}, color.RGBA{0x00, 0xff, 0xff, 0xff},
@@ -99,12 +100,12 @@ func render(grid map[string]int, frames int, dim int) {
 
 		for x := 0; x < dim; x++ {
 			for y := 0; y < dim; y++ {
-				if _, found := grid[strconv.Itoa(x)+","+strconv.Itoa(y)]; found {
+				if _, found := g[strconv.Itoa(x)+","+strconv.Itoa(y)]; found {
 					img.Set(x, y, color.RGBA{255, 255, 255, 255})
 				}
 			}
 		}
-		grid = update(grid)
+		g = update(g)
 	}
 
 	f, err := os.OpenFile("seeds_of_chaos.gif", os.O_WRONLY|os.O_CREATE, 0600)
@@ -144,6 +145,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 125, 125)
-	render(grid, 10, 250)
+	render(&grid, 10, 250)
 
 }
