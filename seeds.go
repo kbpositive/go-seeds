@@ -117,8 +117,6 @@ func render(grid map[string]int, frames int, dim int) {
 		Image: images,
 		Delay: delays,
 	})
-
-	return
 }
 
 // chreate chaos pattern
@@ -146,6 +144,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 125, 125)
-	render(grid, 250, 250)
+	render(grid, 10, 250)
 
 }
