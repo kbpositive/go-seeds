@@ -134,13 +134,10 @@ func render(grid *map[string]int, frames int, dim int) {
 				grid_q4[i] = v
 			}
 		}
-		wg.Add(1)
+		wg.Add(4)
 		go update(grid, &grid_q1, 0)
-		wg.Add(1)
 		go update(grid, &grid_q2, 1)
-		wg.Add(1)
 		go update(grid, &grid_q3, 2)
-		wg.Add(1)
 		go update(grid, &grid_q4, 3)
 		wg.Wait()
 		*grid = make(map[string]int)
