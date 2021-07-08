@@ -25,12 +25,11 @@ var moves = [8][2]int{
 	{0, -1}}
 
 // update grid function
-func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
+func update(grid *map[string]int, grid_memo *map[string]int, quadrants int) {
 	defer wg.Done()
 	var memo = make(map[string]int)
-	var quadrants = 5
 
-	for key := range *grid {
+	for key := range *grid_memo {
 		var stack = []string{key}
 		for len(stack) > 0 {
 			cur := stack[len(stack)-1]
@@ -61,13 +60,14 @@ func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
 
 				// add children if cell is alive
 				if _, found := (*grid)[cur]; found {
+					var slice = 750 / quadrants
 					for _, child := range valid {
 						x := strings.Split(child, ",")[1]
 						yval, _ := strconv.Atoi(x)
-						var slice = 750 / quadrants
 						for j := 0; j < 750; j += slice {
 							if yval >= j && yval < j+slice {
 								stack = append(stack, child)
+								break
 							}
 						}
 					}
@@ -88,7 +88,7 @@ func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
 }
 
 // render grid
-func render(grid *map[string]int, frames int, dim int) {
+func render(grid *map[string]int, frames int, dim int, quadrants int) {
 	var palette = []color.Color{
 		color.RGBA{0x00, 0x00, 0x00, 0xff}, color.RGBA{0x00, 0x00, 0xff, 0xff},
 		color.RGBA{0x00, 0xff, 0x00, 0xff}, color.RGBA{0x00, 0xff, 0xff, 0xff},
@@ -97,7 +97,6 @@ func render(grid *map[string]int, frames int, dim int) {
 	}
 	var images []*image.Paletted
 	var delays []int
-	var quadrants = 5
 
 	for step := 0; step < frames; step++ {
 		img := image.NewPaletted(image.Rect(0, 0, dim, dim), palette)
@@ -117,19 +116,20 @@ func render(grid *map[string]int, frames int, dim int) {
 			grid_q = append(grid_q, make(map[string]int))
 		}
 
+		var slice = 750 / quadrants
 		for i, v := range *grid {
 			row := strings.Split(i, ",")[0]
 			rowval, _ := strconv.Atoi(row)
-			var slice = 750 / quadrants
 			for j := 0; j < 750; j += slice {
 				if rowval >= j && rowval < j+slice {
 					grid_q[((j+slice)/slice)-1][i] = v
+					break
 				}
 			}
 		}
 		wg.Add(quadrants)
 		for i := 0; i < quadrants; i++ {
-			go update(grid, &grid_q[i], i)
+			go update(grid, &grid_q[i], quadrants)
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
@@ -177,6 +177,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 300, 750)
+	render(&grid, 300, 750, 8)
 
 }
