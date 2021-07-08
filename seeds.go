@@ -100,12 +100,12 @@ func render(grid *map[string]int, frames int, dim int) {
 		images = append(images, img)
 		delays = append(delays, 0)
 
-		for x := 0; x < dim; x++ {
-			for y := 0; y < dim; y++ {
-				if _, found := (*grid)[strconv.Itoa(x)+","+strconv.Itoa(y)]; found {
-					img.Set(x, y, color.RGBA{255, 255, 255, 255})
-				}
-			}
+		for i, _ := range *grid {
+			row := strings.Split(i, ",")[0]
+			col := strings.Split(i, ",")[1]
+			rowval, _ := strconv.Atoi(row)
+			colval, _ := strconv.Atoi(col)
+			img.Set(rowval, colval, color.RGBA{255, 255, 255, 255})
 		}
 		update(grid)
 	}
@@ -147,6 +147,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 125, 125)
-	render(&grid, 50, 250)
+	render(&grid, 200, 250)
 
 }
