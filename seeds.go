@@ -141,17 +141,10 @@ func render(grid *map[string]int, frames int, dim int) {
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
-		for i, v := range grid_q[0] {
-			(*grid)[i] = v
-		}
-		for i, v := range grid_q[1] {
-			(*grid)[i] = v
-		}
-		for i, v := range grid_q[2] {
-			(*grid)[i] = v
-		}
-		for i, v := range grid_q[3] {
-			(*grid)[i] = v
+		for j := 0; j < 4; j++ {
+			for i, v := range grid_q[j] {
+				(*grid)[i] = v
+			}
 		}
 	}
 
