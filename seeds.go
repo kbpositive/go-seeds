@@ -22,14 +22,9 @@ var moves = [8][2]int{
 	{0, -1}}
 
 // update grid function
-func update(grid *map[string]int) {
-	// copy grid
-	var decoy = make(map[string]int)
-	for i, v := range *grid {
-		decoy[i] = v
-	}
-
+func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
 	var memo = make(map[string]int)
+
 	for key := range *grid {
 		var stack = []string{key}
 		for len(stack) > 0 {
@@ -62,25 +57,33 @@ func update(grid *map[string]int) {
 				// add children if cell is alive
 				if _, found := (*grid)[cur]; found {
 					for _, child := range valid {
-						stack = append(stack, child)
+						y := strings.Split(child, ",")[0]
+						x := strings.Split(child, ",")[1]
+						yval, _ := strconv.Atoi(x)
+						xval, _ := strconv.Atoi(y)
+						if quadrant == 0 && yval <= 375 && xval <= 375 {
+							stack = append(stack, child)
+						} else if quadrant == 1 && yval <= 375 && xval >= 375 {
+							stack = append(stack, child)
+						} else if quadrant == 2 && yval >= 375 && xval <= 375 {
+							stack = append(stack, child)
+						} else if quadrant == 3 && yval >= 375 && xval >= 375 {
+							stack = append(stack, child)
+						}
 					}
 				}
 
 				// game rules B2/S
 				_, found := (*grid)[cur]
 				if found != true && len(children) == 2 {
-					decoy[cur] = 1
+					(*grid_memo)[cur] = 1
 				} else if found {
-					delete(decoy, cur)
+					delete(*grid_memo, cur)
 				}
 
 			}
 
 		}
-	}
-	*grid = make(map[string]int)
-	for i, v := range decoy {
-		(*grid)[i] = v
 	}
 }
 
@@ -107,7 +110,19 @@ func render(grid *map[string]int, frames int, dim int) {
 			colval, _ := strconv.Atoi(col)
 			img.Set(rowval, colval, color.RGBA{255, 255, 255, 255})
 		}
-		update(grid)
+
+		var grid_memo = make(map[string]int)
+		for i, v := range *grid {
+			grid_memo[i] = v
+		}
+		update(grid, &grid_memo, 0)
+		update(grid, &grid_memo, 1)
+		update(grid, &grid_memo, 2)
+		update(grid, &grid_memo, 3)
+		*grid = make(map[string]int)
+		for i, v := range grid_memo {
+			(*grid)[i] = v
+		}
 	}
 
 	f, err := os.OpenFile("seeds_of_chaos.gif", os.O_WRONLY|os.O_CREATE, 0600)
@@ -147,6 +162,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 300, 750)
+	render(&grid, 100, 750)
 
 }
