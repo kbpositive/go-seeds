@@ -25,7 +25,7 @@ var moves = [8][2]int{
 	{0, -1}}
 
 // update grid function
-func update(grid *map[string]int, grid_memo *map[string]int, bias *int, mx *int, slice int, quadrant int) {
+func update(grid *map[string]int, grid_memo *map[string]int) {
 	defer wg.Done()
 	var memo = make(map[string]int)
 
@@ -89,8 +89,8 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 	}
 	var images []*image.Paletted
 	var delays []int
-	var mn = 375 - quadrants
-	var mx = 375 + quadrants
+	var mn = 500 - quadrants
+	var mx = 500 + quadrants
 
 	for step := 0; step < frames; step++ {
 		img := image.NewPaletted(image.Rect(0, 0, dim, dim), palette)
@@ -128,7 +128,7 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 		}
 		wg.Add(quadrants)
 		for i := 0; i < quadrants; i++ {
-			go update(grid, &grid_q[i], &mn, &mx, slice, i)
+			go update(grid, &grid_q[i])
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
@@ -175,7 +175,7 @@ func main() {
 	var grid = make(map[string]int)
 
 	// add chaos pattern
-	grid = chaos(grid, 375, 375)
-	render(&grid, 500, 750, 16)
+	grid = chaos(grid, 500, 500)
+	render(&grid, 500, 1000, 16)
 
 }
