@@ -25,7 +25,7 @@ var moves = [8][2]int{
 	{0, -1}}
 
 // update grid function
-func update(grid *map[string]int, grid_memo *map[string]int, bias int, mx int, slice int, quadrant int) {
+func update(grid *map[string]int, grid_memo *map[string]int, bias *int, mx *int, slice int, quadrant int) {
 	defer wg.Done()
 	var memo = make(map[string]int)
 
@@ -128,7 +128,7 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 		}
 		wg.Add(quadrants)
 		for i := 0; i < quadrants; i++ {
-			go update(grid, &grid_q[i], mn, mx, slice, i)
+			go update(grid, &grid_q[i], &mn, &mx, slice, i)
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
@@ -176,6 +176,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 400, 750, 16)
+	render(&grid, 300, 750, 16)
 
 }
