@@ -120,9 +120,9 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 		for i, v := range *grid {
 			row := strings.Split(i, ",")[0]
 			rowval, _ := strconv.Atoi(row)
-			for j := 0; j < 750; j += slice {
-				if rowval >= j && rowval < j+slice {
-					grid_q[((j+slice)/slice)-1][i] = v
+			for j := 0; j < quadrants; j++ {
+				if rowval >= j*slice && rowval < (j+1)*slice {
+					grid_q[j][i] = v
 					break
 				}
 			}
@@ -177,6 +177,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 300, 750, 8)
+	render(&grid, 500, 750, 8)
 
 }
