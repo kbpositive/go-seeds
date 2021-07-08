@@ -28,6 +28,7 @@ var moves = [8][2]int{
 func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
 	defer wg.Done()
 	var memo = make(map[string]int)
+	var quadrants = 5
 
 	for key := range *grid {
 		var stack = []string{key}
@@ -61,18 +62,13 @@ func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
 				// add children if cell is alive
 				if _, found := (*grid)[cur]; found {
 					for _, child := range valid {
-						y := strings.Split(child, ",")[0]
 						x := strings.Split(child, ",")[1]
 						yval, _ := strconv.Atoi(x)
-						xval, _ := strconv.Atoi(y)
-						if quadrant == 0 && yval <= 375 && xval <= 375 {
-							stack = append(stack, child)
-						} else if quadrant == 1 && yval <= 375 && xval >= 375 {
-							stack = append(stack, child)
-						} else if quadrant == 2 && yval >= 375 && xval <= 375 {
-							stack = append(stack, child)
-						} else if quadrant == 3 && yval >= 375 && xval >= 375 {
-							stack = append(stack, child)
+						var slice = 750 / quadrants
+						for j := 0; j < 750; j += slice {
+							if yval >= j && yval < j+slice {
+								stack = append(stack, child)
+							}
 						}
 					}
 				}
@@ -101,7 +97,7 @@ func render(grid *map[string]int, frames int, dim int) {
 	}
 	var images []*image.Paletted
 	var delays []int
-	var quadrants = 4
+	var quadrants = 5
 
 	for step := 0; step < frames; step++ {
 		img := image.NewPaletted(image.Rect(0, 0, dim, dim), palette)
@@ -123,17 +119,12 @@ func render(grid *map[string]int, frames int, dim int) {
 
 		for i, v := range *grid {
 			row := strings.Split(i, ",")[0]
-			col := strings.Split(i, ",")[1]
 			rowval, _ := strconv.Atoi(row)
-			colval, _ := strconv.Atoi(col)
-			if rowval <= 375 && colval <= 375 {
-				grid_q[0][i] = v
-			} else if rowval <= 375 && colval >= 375 {
-				grid_q[1][i] = v
-			} else if rowval >= 375 && colval <= 375 {
-				grid_q[2][i] = v
-			} else if rowval >= 375 && colval >= 375 {
-				grid_q[3][i] = v
+			var slice = 750 / quadrants
+			for j := 0; j < 750; j += slice {
+				if rowval >= j && rowval < j+slice {
+					grid_q[((j+slice)/slice)-1][i] = v
+				}
 			}
 		}
 		wg.Add(quadrants)
