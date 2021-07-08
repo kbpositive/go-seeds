@@ -136,10 +136,9 @@ func render(grid *map[string]int, frames int, dim int) {
 			}
 		}
 		wg.Add(4)
-		go update(grid, &grid_q[0], 0)
-		go update(grid, &grid_q[1], 1)
-		go update(grid, &grid_q[2], 2)
-		go update(grid, &grid_q[3], 3)
+		for i := 0; i < 4; i++ {
+			go update(grid, &grid_q[i], i)
+		}
 		wg.Wait()
 		*grid = make(map[string]int)
 		for i, v := range grid_q[0] {
