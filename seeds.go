@@ -146,7 +146,7 @@ func main() {
 	var grid = make(map[string]int)
 
 	// add chaos pattern
-	grid = chaos(grid, 125, 125)
-	render(&grid, 200, 250)
+	grid = chaos(grid, 375, 375)
+	render(&grid, 300, 750)
 
 }
