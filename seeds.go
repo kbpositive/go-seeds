@@ -51,7 +51,7 @@ func update(grid *map[string]int) {
 					valid = append(valid, strconv.Itoa(introw)+","+strconv.Itoa(intcol))
 				}
 
-				// valid children
+				// live children
 				var children []int
 				for _, move := range valid {
 					if _, found := (*grid)[move]; found {
