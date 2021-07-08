@@ -101,6 +101,7 @@ func render(grid *map[string]int, frames int, dim int) {
 	}
 	var images []*image.Paletted
 	var delays []int
+	var quadrants = 4
 
 	for step := 0; step < frames; step++ {
 		img := image.NewPaletted(image.Rect(0, 0, dim, dim), palette)
@@ -116,7 +117,7 @@ func render(grid *map[string]int, frames int, dim int) {
 		}
 
 		var grid_q []map[string]int
-		for i := 0; i < 4; i++ {
+		for i := 0; i < quadrants; i++ {
 			grid_q = append(grid_q, make(map[string]int))
 		}
 
@@ -135,13 +136,13 @@ func render(grid *map[string]int, frames int, dim int) {
 				grid_q[3][i] = v
 			}
 		}
-		wg.Add(4)
-		for i := 0; i < 4; i++ {
+		wg.Add(quadrants)
+		for i := 0; i < quadrants; i++ {
 			go update(grid, &grid_q[i], i)
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
-		for j := 0; j < 4; j++ {
+		for j := 0; j < quadrants; j++ {
 			for i, v := range grid_q[j] {
 				(*grid)[i] = v
 			}
