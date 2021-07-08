@@ -8,7 +8,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+var wg sync.WaitGroup
 
 // define moves
 var moves = [8][2]int{
@@ -23,6 +26,7 @@ var moves = [8][2]int{
 
 // update grid function
 func update(grid *map[string]int, grid_memo *map[string]int, quadrant int) {
+	defer wg.Done()
 	var memo = make(map[string]int)
 
 	for key := range *grid {
@@ -111,16 +115,45 @@ func render(grid *map[string]int, frames int, dim int) {
 			img.Set(rowval, colval, color.RGBA{255, 255, 255, 255})
 		}
 
-		var grid_memo = make(map[string]int)
+		var grid_q1 = make(map[string]int)
+		var grid_q2 = make(map[string]int)
+		var grid_q3 = make(map[string]int)
+		var grid_q4 = make(map[string]int)
 		for i, v := range *grid {
-			grid_memo[i] = v
+			row := strings.Split(i, ",")[0]
+			col := strings.Split(i, ",")[1]
+			rowval, _ := strconv.Atoi(row)
+			colval, _ := strconv.Atoi(col)
+			if rowval <= 375 && colval <= 375 {
+				grid_q1[i] = v
+			} else if rowval <= 375 && colval >= 375 {
+				grid_q2[i] = v
+			} else if rowval >= 375 && colval <= 375 {
+				grid_q3[i] = v
+			} else if rowval >= 375 && colval >= 375 {
+				grid_q4[i] = v
+			}
 		}
-		update(grid, &grid_memo, 0)
-		update(grid, &grid_memo, 1)
-		update(grid, &grid_memo, 2)
-		update(grid, &grid_memo, 3)
+		wg.Add(1)
+		go update(grid, &grid_q1, 0)
+		wg.Add(1)
+		go update(grid, &grid_q2, 1)
+		wg.Add(1)
+		go update(grid, &grid_q3, 2)
+		wg.Add(1)
+		go update(grid, &grid_q4, 3)
+		wg.Wait()
 		*grid = make(map[string]int)
-		for i, v := range grid_memo {
+		for i, v := range grid_q1 {
+			(*grid)[i] = v
+		}
+		for i, v := range grid_q2 {
+			(*grid)[i] = v
+		}
+		for i, v := range grid_q3 {
+			(*grid)[i] = v
+		}
+		for i, v := range grid_q4 {
 			(*grid)[i] = v
 		}
 	}
@@ -162,6 +195,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 100, 750)
+	render(&grid, 300, 750)
 
 }
