@@ -176,6 +176,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 300, 750, 16)
+	render(&grid, 500, 750, 16)
 
 }
