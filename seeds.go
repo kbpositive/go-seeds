@@ -115,42 +115,43 @@ func render(grid *map[string]int, frames int, dim int) {
 			img.Set(rowval, colval, color.RGBA{255, 255, 255, 255})
 		}
 
-		var grid_q1 = make(map[string]int)
-		var grid_q2 = make(map[string]int)
-		var grid_q3 = make(map[string]int)
-		var grid_q4 = make(map[string]int)
+		var grid_q []map[string]int
+		for i := 0; i < 4; i++ {
+			grid_q = append(grid_q, make(map[string]int))
+		}
+
 		for i, v := range *grid {
 			row := strings.Split(i, ",")[0]
 			col := strings.Split(i, ",")[1]
 			rowval, _ := strconv.Atoi(row)
 			colval, _ := strconv.Atoi(col)
 			if rowval <= 375 && colval <= 375 {
-				grid_q1[i] = v
+				grid_q[0][i] = v
 			} else if rowval <= 375 && colval >= 375 {
-				grid_q2[i] = v
+				grid_q[1][i] = v
 			} else if rowval >= 375 && colval <= 375 {
-				grid_q3[i] = v
+				grid_q[2][i] = v
 			} else if rowval >= 375 && colval >= 375 {
-				grid_q4[i] = v
+				grid_q[3][i] = v
 			}
 		}
 		wg.Add(4)
-		go update(grid, &grid_q1, 0)
-		go update(grid, &grid_q2, 1)
-		go update(grid, &grid_q3, 2)
-		go update(grid, &grid_q4, 3)
+		go update(grid, &grid_q[0], 0)
+		go update(grid, &grid_q[1], 1)
+		go update(grid, &grid_q[2], 2)
+		go update(grid, &grid_q[3], 3)
 		wg.Wait()
 		*grid = make(map[string]int)
-		for i, v := range grid_q1 {
+		for i, v := range grid_q[0] {
 			(*grid)[i] = v
 		}
-		for i, v := range grid_q2 {
+		for i, v := range grid_q[1] {
 			(*grid)[i] = v
 		}
-		for i, v := range grid_q3 {
+		for i, v := range grid_q[2] {
 			(*grid)[i] = v
 		}
-		for i, v := range grid_q4 {
+		for i, v := range grid_q[3] {
 			(*grid)[i] = v
 		}
 	}
