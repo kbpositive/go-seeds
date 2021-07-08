@@ -25,7 +25,7 @@ var moves = [8][2]int{
 	{0, -1}}
 
 // update grid function
-func update(grid *map[string]int, grid_memo *map[string]int, quadrants int) {
+func update(grid *map[string]int, grid_memo *map[string]int, bias int, mx int, slice int, quadrant int) {
 	defer wg.Done()
 	var memo = make(map[string]int)
 
@@ -60,16 +60,8 @@ func update(grid *map[string]int, grid_memo *map[string]int, quadrants int) {
 
 				// add children if cell is alive
 				if _, found := (*grid)[cur]; found {
-					var slice = 750 / quadrants
 					for _, child := range valid {
-						x := strings.Split(child, ",")[1]
-						yval, _ := strconv.Atoi(x)
-						for j := 0; j < 750; j += slice {
-							if yval >= j && yval < j+slice {
-								stack = append(stack, child)
-								break
-							}
-						}
+						stack = append(stack, child)
 					}
 				}
 
@@ -97,6 +89,8 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 	}
 	var images []*image.Paletted
 	var delays []int
+	var mn = 375 - quadrants
+	var mx = 375 + quadrants
 
 	for step := 0; step < frames; step++ {
 		img := image.NewPaletted(image.Rect(0, 0, dim, dim), palette)
@@ -116,12 +110,17 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 			grid_q = append(grid_q, make(map[string]int))
 		}
 
-		var slice = 750 / quadrants
+		var slice = mx / quadrants
 		for i, v := range *grid {
 			row := strings.Split(i, ",")[0]
 			rowval, _ := strconv.Atoi(row)
+			if rowval > mx {
+				mx = rowval
+			} else if rowval < mn {
+				mn = rowval
+			}
 			for j := 0; j < quadrants; j++ {
-				if rowval >= j*slice && rowval < (j+1)*slice {
+				if rowval >= (j*slice)+mn && rowval < ((j+1)*slice)+mn {
 					grid_q[j][i] = v
 					break
 				}
@@ -129,7 +128,7 @@ func render(grid *map[string]int, frames int, dim int, quadrants int) {
 		}
 		wg.Add(quadrants)
 		for i := 0; i < quadrants; i++ {
-			go update(grid, &grid_q[i], quadrants)
+			go update(grid, &grid_q[i], mn, mx, slice, i)
 		}
 		wg.Wait()
 		*grid = make(map[string]int)
@@ -177,6 +176,6 @@ func main() {
 
 	// add chaos pattern
 	grid = chaos(grid, 375, 375)
-	render(&grid, 500, 750, 8)
+	render(&grid, 400, 750, 16)
 
 }
